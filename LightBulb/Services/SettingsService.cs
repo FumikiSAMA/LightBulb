@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Linq;
 using System.Net;
-using LightBulb.Helpers;
+using LightBulb.Internal;
 using LightBulb.Models;
 using Tyrrrz.Extensions;
 using Tyrrrz.Settings;
 
 namespace LightBulb.Services
 {
-    public class FileSettingsService : SettingsManager, ISettingsService, IDisposable
+    public class SettingsService : SettingsManager, ISettingsService, IDisposable
     {
         private readonly Timer _autosaveTimer;
 
@@ -209,7 +209,7 @@ namespace LightBulb.Services
             set => Set(ref _proxy, value);
         }
 
-        public FileSettingsService()
+        public SettingsService()
         {
             // Portable
             if (Environment.GetCommandLineArgs().Contains("-portable"))
@@ -278,18 +278,9 @@ namespace LightBulb.Services
             }
         }
 
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                _autosaveTimer.Dispose();
-            }
-        }
-
         public void Dispose()
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
+            _autosaveTimer.Dispose();
         }
     }
 }

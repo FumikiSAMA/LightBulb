@@ -4,9 +4,6 @@ using LightBulb.Models;
 
 namespace LightBulb.Services
 {
-    /// <summary>
-    /// Implemented by classes that provide access to user settings
-    /// </summary>
     public interface ISettingsService : INotifyPropertyChanged
     {
         bool IsGammaPollingEnabled { get; set; }
@@ -32,14 +29,8 @@ namespace LightBulb.Services
         Hotkey TogglePollingHotkey { get; set; }
         Proxy Proxy { get; set; }
 
-        /// <summary>
-        /// Load settings from persistent storage
-        /// </summary>
         void Load();
 
-        /// <summary>
-        /// Save settings to persistent storage
-        /// </summary>
         void Save();
     }
 }

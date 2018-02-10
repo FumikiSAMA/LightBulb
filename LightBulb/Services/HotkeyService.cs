@@ -8,22 +8,22 @@ using Tyrrrz.Extensions;
 
 namespace LightBulb.Services
 {
-    public class WindowsHotkeyService : IHotkeyService, IDisposable
+    public class HotkeyService : IHotkeyService, IDisposable
     {
         private readonly SpongeWindow _sponge;
-        private readonly Dictionary<int, HotkeyHandler> _hotkeyHandlerDic;
+        private readonly Dictionary<int, Action> _hotkeyHandlerDic;
 
-        public WindowsHotkeyService()
+        public HotkeyService()
         {
             _sponge = new SpongeWindow();
-            _hotkeyHandlerDic = new Dictionary<int, HotkeyHandler>();
+            _hotkeyHandlerDic = new Dictionary<int, Action>();
 
             _sponge.WndProcFired += ProcessMessage;
         }
 
-        ~WindowsHotkeyService()
+        ~HotkeyService()
         {
-            Dispose(false);
+            ReleaseUnmanagedResources();
         }
 
         private void ProcessMessage(object sender, WndProcEventArgs args)
@@ -36,11 +36,10 @@ namespace LightBulb.Services
             handler?.Invoke();
         }
 
-        /// <inheritdoc />
-        public void RegisterHotkey(Hotkey hotkey, HotkeyHandler handler)
+        public void Register(Hotkey hotkey, Action handler)
         {
-            var vk = KeyInterop.VirtualKeyFromKey((Key) hotkey.Key);
-            var mods = hotkey.Modifiers;
+            var vk = KeyInterop.VirtualKeyFromKey(hotkey.Key);
+            var mods = (int) hotkey.Modifiers;
             var id = (vk << 8) | mods;
 
             if (!NativeMethods.RegisterHotKey(_sponge.Handle, id, mods, vk))
@@ -52,11 +51,10 @@ namespace LightBulb.Services
             _hotkeyHandlerDic.Add(id, handler);
         }
 
-        /// <inheritdoc />
-        public void UnregisterHotkey(Hotkey hotkey)
+        public void Unregister(Hotkey hotkey)
         {
-            var vk = KeyInterop.VirtualKeyFromKey((Key) hotkey.Key);
-            var mods = hotkey.Modifiers;
+            var vk = KeyInterop.VirtualKeyFromKey(hotkey.Key);
+            var mods = (int) hotkey.Modifiers;
             var id = (vk << 8) | mods;
 
             if (!NativeMethods.UnregisterHotKey(_sponge.Handle, id))
@@ -67,8 +65,7 @@ namespace LightBulb.Services
             _hotkeyHandlerDic.Remove(id);
         }
 
-        /// <inheritdoc />
-        public void UnregisterAllHotkeys()
+        public void UnregisterAll()
         {
             foreach (var hotkey in _hotkeyHandlerDic)
             {
@@ -81,14 +78,14 @@ namespace LightBulb.Services
             _hotkeyHandlerDic.Clear();
         }
 
-        protected void Dispose(bool disposing)
+        private void ReleaseUnmanagedResources()
         {
-            UnregisterAllHotkeys();
+            UnregisterAll();
         }
 
         public void Dispose()
         {
-            Dispose(true);
+            ReleaseUnmanagedResources();
             GC.SuppressFinalize(this);
         }
     }

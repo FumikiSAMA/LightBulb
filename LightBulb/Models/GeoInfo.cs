@@ -1,40 +1,22 @@
 ﻿namespace LightBulb.Models
 {
-    /// <summary>
-    /// Information about geographical location
-    /// </summary>
     public class GeoInfo
     {
-        /// <summary>
-        /// Country name
-        /// </summary>
-        public string Country { get; }
+        public string CountryName { get; }
 
-        /// <summary>
-        /// Country code
-        /// </summary>
         public string CountryCode { get; }
 
-        /// <summary>
-        /// City name
-        /// </summary>
-        public string City { get; }
+        public string CityName { get; }
 
-        /// <summary>
-        /// Latitude
-        /// </summary>
         public double Latitude { get; }
 
-        /// <summary>
-        /// Longitude
-        /// </summary>
         public double Longitude { get; }
 
-        public GeoInfo(string country, string countryCode, string city, double latitude, double longitude)
+        public GeoInfo(string countryName, string countryCode, string cityName, double latitude, double longitude)
         {
-            Country = country;
+            CountryName = countryName;
             CountryCode = countryCode;
-            City = city;
+            CityName = cityName;
             Latitude = latitude;
             Longitude = longitude;
         }

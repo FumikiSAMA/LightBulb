@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Diagnostics;
-using LightBulb.Helpers;
+using LightBulb.Internal;
 using LightBulb.Models;
 using Microsoft.Win32;
 using Tyrrrz.Extensions;
@@ -24,7 +24,6 @@ namespace LightBulb.Services
         private DateTime _cyclePreviewTime;
         private ushort _requestedPreviewTemperature;
 
-        /// <inheritdoc />
         public ushort Temperature
         {
             get => _temperature; private set
@@ -40,7 +39,6 @@ namespace LightBulb.Services
             }
         }
 
-        /// <inheritdoc />
         public bool IsRealtimeModeEnabled
         {
             get => _isRealtimeModeEnabled; set
@@ -57,7 +55,6 @@ namespace LightBulb.Services
             }
         }
 
-        /// <inheritdoc />
         public bool IsPreviewModeEnabled
         {
             get => _isPreviewModeEnabled; set
@@ -74,7 +71,6 @@ namespace LightBulb.Services
             }
         }
 
-        /// <inheritdoc />
         public DateTime CyclePreviewTime
         {
             get => _cyclePreviewTime; private set
@@ -84,19 +80,14 @@ namespace LightBulb.Services
             }
         }
 
-        /// <inheritdoc />
         public bool IsCyclePreviewRunning => _cyclePreviewTimer.IsEnabled;
 
-        /// <inheritdoc />
         public event EventHandler Tick;
 
-        /// <inheritdoc />
         public event EventHandler Updated;
 
-        /// <inheritdoc />
         public event EventHandler CyclePreviewStarted;
 
-        /// <inheritdoc />
         public event EventHandler CyclePreviewEnded;
 
         public TemperatureService(ISettingsService settingsService, IGammaService gammaService)
@@ -152,11 +143,6 @@ namespace LightBulb.Services
             _temperature = _settingsService.DefaultMonitorTemperature;
         }
 
-        ~TemperatureService()
-        {
-            Dispose(false);
-        }
-
         private void SystemDisplaySettingsChanged(object sender, EventArgs args)
         {
             UpdateTemperature();
@@ -195,7 +181,7 @@ namespace LightBulb.Services
         private void UpdateGamma()
         {
             var intens = ColorIntensity.FromTemperature(Temperature);
-            _gammaService.SetDisplayGammaLinear(intens);
+            _gammaService.SetLinear(intens);
             Debug.WriteLine($"Gamma updated (-> {intens})", GetType().Name);
         }
 
@@ -238,10 +224,6 @@ namespace LightBulb.Services
 
         private ushort GetTemperature(DateTime dt) => GetTemperature(dt.TimeOfDay);
 
-        /// <summary>
-        /// Update temperature based on the current mode and time
-        /// </summary>
-        /// <param name="forceInstantSwitch">When set to true, will always change temperature instantly instead of occasionally using smooth transitions</param>
         private void UpdateTemperature(bool forceInstantSwitch = false)
         {
             ushort newTemp;
@@ -312,14 +294,12 @@ namespace LightBulb.Services
             }
         }
 
-        /// <inheritdoc />
         public void RefreshGamma()
         {
             UpdateTemperature(true);
             UpdateGamma();
         }
 
-        /// <inheritdoc />
         public void RequestPreviewTemperature(ushort temp)
         {
             _requestedPreviewTemperature = temp;
@@ -327,7 +307,6 @@ namespace LightBulb.Services
                 UpdateTemperature(true);
         }
 
-        /// <inheritdoc />
         public void StartCyclePreview()
         {
             CyclePreviewTime = DateTime.Now;
@@ -337,7 +316,6 @@ namespace LightBulb.Services
             CyclePreviewStarted?.Invoke(this, EventArgs.Empty);
         }
 
-        /// <inheritdoc />
         public void StopCyclePreview()
         {
             _cyclePreviewTimer.IsEnabled = false;
@@ -347,26 +325,16 @@ namespace LightBulb.Services
             CyclePreviewEnded?.Invoke(this, EventArgs.Empty);
         }
 
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                _temperatureUpdateTimer.Dispose();
-                _cyclePreviewTimer.Dispose();
-                _pollingTimer.Dispose();
-                _temperatureSmoother.Dispose();
-
-                SystemEvents.PowerModeChanged -= SystemPowerModeChanged;
-                SystemEvents.DisplaySettingsChanged -= SystemDisplaySettingsChanged;
-                _settingsService.PropertyChanged -= SettingsServicePropertyChanged;
-            }
-        }
-
-        /// <inheritdoc />
         public void Dispose()
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
+            _temperatureUpdateTimer.Dispose();
+            _cyclePreviewTimer.Dispose();
+            _pollingTimer.Dispose();
+            _temperatureSmoother.Dispose();
+
+            SystemEvents.PowerModeChanged -= SystemPowerModeChanged;
+            SystemEvents.DisplaySettingsChanged -= SystemDisplaySettingsChanged;
+            _settingsService.PropertyChanged -= SettingsServicePropertyChanged;
         }
     }
 }

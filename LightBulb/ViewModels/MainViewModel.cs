@@ -7,7 +7,7 @@ using System.Windows;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.CommandWpf;
 using GalaSoft.MvvmLight.Threading;
-using LightBulb.Helpers;
+using LightBulb.Internal;
 using LightBulb.Models;
 using LightBulb.Services;
 using Tyrrrz.Extensions;
@@ -21,7 +21,7 @@ namespace LightBulb.ViewModels
         private readonly IWindowService _windowService;
         private readonly IHotkeyService _hotkeyService;
         private readonly IGeoService _geoService;
-        private readonly IVersionCheckService _versionCheckService;
+        private readonly IUpdateCheckService _updateCheckService;
 
         private readonly Timer _checkForUpdatesTimer;
         private readonly SyncedTimer _internetSyncTimer;
@@ -34,20 +34,16 @@ namespace LightBulb.ViewModels
         private CycleState _cycleState;
         private double _cyclePosition;
 
-        /// <inheritdoc />
         public ISettingsService SettingsService { get; }
 
-        /// <inheritdoc />
         public Version Version => Assembly.GetEntryAssembly().GetName().Version;
 
-        /// <inheritdoc />
         public bool IsUpdateAvailable
         {
             get => _isUpdateAvailable;
             private set => Set(ref _isUpdateAvailable, value);
         }
 
-        /// <inheritdoc />
         public bool IsEnabled
         {
             get => _isEnabled;
@@ -60,7 +56,6 @@ namespace LightBulb.ViewModels
             }
         }
 
-        /// <inheritdoc />
         public bool IsBlocked
         {
             get => _isBlocked;
@@ -72,21 +67,18 @@ namespace LightBulb.ViewModels
             }
         }
 
-        /// <inheritdoc />
         public string StatusText
         {
             get => _statusText;
             private set => Set(ref _statusText, value);
         }
 
-        /// <inheritdoc />
         public CycleState CycleState
         {
             get => _cycleState;
             private set => Set(ref _cycleState, value);
         }
 
-        /// <inheritdoc />
         public double CyclePosition
         {
             get => _cyclePosition;
@@ -108,7 +100,7 @@ namespace LightBulb.ViewModels
             IWindowService windowService,
             IHotkeyService hotkeyService,
             IGeoService geoService,
-            IVersionCheckService versionCheckService)
+            IUpdateCheckService updateCheckService)
         {
             // Services
             SettingsService = settingsService;
@@ -116,7 +108,7 @@ namespace LightBulb.ViewModels
             _windowService = windowService;
             _hotkeyService = hotkeyService;
             _geoService = geoService;
-            _versionCheckService = versionCheckService;
+            _updateCheckService = updateCheckService;
 
             _temperatureService.Tick += TemperatureServiceTick;
             _temperatureService.Updated += TemperatureServiceUpdated;
@@ -181,11 +173,6 @@ namespace LightBulb.ViewModels
             IsEnabled = true;
         }
 
-        ~MainViewModel()
-        {
-            Dispose(false);
-        }
-
         private void TemperatureServiceTick(object sender, EventArgs e)
         {
             UpdateStatusText();
@@ -227,14 +214,14 @@ namespace LightBulb.ViewModels
 
         private void UpdateHotkeys()
         {
-            _hotkeyService.UnregisterAllHotkeys();
+            _hotkeyService.UnregisterAll();
 
             if (SettingsService.ToggleHotkey != null)
-                _hotkeyService.RegisterHotkey(SettingsService.ToggleHotkey,
+                _hotkeyService.Register(SettingsService.ToggleHotkey,
                     () => IsEnabled = !IsEnabled);
 
             if (SettingsService.TogglePollingHotkey != null)
-                _hotkeyService.RegisterHotkey(SettingsService.TogglePollingHotkey,
+                _hotkeyService.Register(SettingsService.TogglePollingHotkey,
                     () => SettingsService.IsGammaPollingEnabled = !SettingsService.IsGammaPollingEnabled);
         }
 
@@ -323,40 +310,33 @@ namespace LightBulb.ViewModels
             }
         }
 
-        /// <summary>
-        /// Check for program updates
-        /// </summary>
         private async Task CheckForUpdatesAsync()
         {
             if (!SettingsService.IsCheckForUpdatesEnabled) return;
 
-            IsUpdateAvailable = await _versionCheckService.GetUpdateStatusAsync();
+            IsUpdateAvailable = await _updateCheckService.CheckIfNewVersionAvailableAsync();
 
             Debug.WriteLine($"Checked for updates ({(IsUpdateAvailable ? "update found" : "update not found")})",
                 GetType().Name);
         }
 
-        /// <summary>
-        /// Get updated solar info and overwrite respective settings with new data
-        /// </summary>
         private async Task SynchronizeWithInternetAsync()
         {
             if (!SettingsService.IsInternetSyncEnabled) return;
 
             // Geo info
-            if (SettingsService.GeoInfo == null || !SettingsService.IsGeoInfoLocked)
+            var geoInfo = SettingsService.GeoInfo;
+            if (!SettingsService.IsGeoInfoLocked || geoInfo == null)
             {
-                var geoInfo = await _geoService.GetGeoInfoAsync();
-                if (geoInfo == null) return;
-                SettingsService.GeoInfo = geoInfo;
+                geoInfo = await _geoService.GetGeoInfoAsync();
             }
 
             // Solar info
-            var solarInfo = await _geoService.GetSolarInfoAsync(SettingsService.GeoInfo);
-            if (solarInfo == null) return;
+            var solarInfo = await _geoService.GetSolarInfoAsync(geoInfo.Latitude, geoInfo.Longitude);
 
             if (SettingsService.IsInternetSyncEnabled)
             {
+                SettingsService.GeoInfo = geoInfo;
                 SettingsService.SunriseTime = solarInfo.SunriseTime;
                 SettingsService.SunsetTime = solarInfo.SunsetTime;
             }
@@ -364,26 +344,16 @@ namespace LightBulb.ViewModels
             Debug.WriteLine("Internet sync done", GetType().Name);
         }
 
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                _checkForUpdatesTimer.Dispose();
-                _internetSyncTimer.Dispose();
-                _disableTemporarilyTimer.Dispose();
-
-                _temperatureService.Updated -= TemperatureServiceUpdated;
-                _temperatureService.Tick -= TemperatureServiceTick;
-                _windowService.FullScreenStateChanged -= WindowServiceFullScreenStateChanged;
-                SettingsService.PropertyChanged -= SettingsServicePropertyChanged;
-            }
-        }
-
-        /// <inheritdoc />
         public void Dispose()
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
+            _checkForUpdatesTimer.Dispose();
+            _internetSyncTimer.Dispose();
+            _disableTemporarilyTimer.Dispose();
+
+            _temperatureService.Updated -= TemperatureServiceUpdated;
+            _temperatureService.Tick -= TemperatureServiceTick;
+            _windowService.FullScreenStateChanged -= WindowServiceFullScreenStateChanged;
+            SettingsService.PropertyChanged -= SettingsServicePropertyChanged;
         }
     }
 }

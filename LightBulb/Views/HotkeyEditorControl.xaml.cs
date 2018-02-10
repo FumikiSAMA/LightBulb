@@ -27,9 +27,6 @@ namespace LightBulb.Views
                     Key.Divide, Key.Multiply, Key.Subtract, Key.Oem102, Key.Decimal);
         }
 
-        /// <summary>
-        /// Currently selected hotkey
-        /// </summary>
         public Hotkey Hotkey
         {
             get => (Hotkey) GetValue(HotkeyProperty);
@@ -81,7 +78,7 @@ namespace LightBulb.Views
                 return;
 
             // Set values
-            Hotkey = new Hotkey((int) key, (int) modifiers);
+            Hotkey = new Hotkey(key, modifiers);
         }
     }
 }

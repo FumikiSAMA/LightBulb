@@ -9,9 +9,6 @@ namespace LightBulb
 {
     public sealed class Locator
     {
-        /// <summary>
-        /// Initialize service locator
-        /// </summary>
         public static void Init()
         {
             if (ViewModelBase.IsInDesignModeStatic) return;
@@ -19,14 +16,14 @@ namespace LightBulb
             ServiceLocator.SetLocatorProvider(() => SimpleIoc.Default);
 
             // Services
-            SimpleIoc.Default.Register<IGammaService, WindowsGammaService>();
-            SimpleIoc.Default.Register<IGeoService, WebGeoService>();
-            SimpleIoc.Default.Register<IHotkeyService, WindowsHotkeyService>();
+            SimpleIoc.Default.Register<IGammaService, GammaService>();
+            SimpleIoc.Default.Register<IGeoService, GeoService>();
+            SimpleIoc.Default.Register<IHotkeyService, HotkeyService>();
             SimpleIoc.Default.Register<IHttpService, HttpService>();
-            SimpleIoc.Default.Register<ISettingsService, FileSettingsService>();
+            SimpleIoc.Default.Register<ISettingsService, SettingsService>();
             SimpleIoc.Default.Register<ITemperatureService, TemperatureService>();
-            SimpleIoc.Default.Register<IVersionCheckService, WebVersionCheckService>();
-            SimpleIoc.Default.Register<IWindowService, WindowsWindowService>();
+            SimpleIoc.Default.Register<IUpdateCheckService, UpdateCheckService>();
+            SimpleIoc.Default.Register<IWindowService, WindowService>();
 
             // View models
             SimpleIoc.Default.Register<IAdvancedSettingsViewModel, AdvancedSettingsViewModel>();
@@ -38,9 +35,6 @@ namespace LightBulb
             ServiceLocator.Current.GetInstance<ISettingsService>().Load();
         }
 
-        /// <summary>
-        /// Cleanup resources used by service locator
-        /// </summary>
         public static void Cleanup()
         {
             // Save settings
@@ -53,7 +47,7 @@ namespace LightBulb
             (ServiceLocator.Current.GetInstance<IHttpService>() as IDisposable)?.Dispose();
             (ServiceLocator.Current.GetInstance<ISettingsService>() as IDisposable)?.Dispose();
             (ServiceLocator.Current.GetInstance<ITemperatureService>() as IDisposable)?.Dispose();
-            (ServiceLocator.Current.GetInstance<IVersionCheckService>() as IDisposable)?.Dispose();
+            (ServiceLocator.Current.GetInstance<IUpdateCheckService>() as IDisposable)?.Dispose();
             (ServiceLocator.Current.GetInstance<IWindowService>() as IDisposable)?.Dispose();
 
             (ServiceLocator.Current.GetInstance<IAdvancedSettingsViewModel>() as IDisposable)?.Dispose();

@@ -4,34 +4,28 @@ using LightBulb.Models;
 
 namespace LightBulb.Services
 {
-    public class WindowsGammaService : IGammaService, IDisposable
+    public class GammaService : IGammaService, IDisposable
     {
         private readonly IntPtr _dc;
         private int _gammaChannelOffset;
 
-        public WindowsGammaService()
+        public GammaService()
         {
             _dc = NativeMethods.GetDC(IntPtr.Zero);
         }
 
-        ~WindowsGammaService()
+        ~GammaService()
         {
-            Dispose(false);
+            ReleaseUnmanagedResources();
         }
 
-        /// <summary>
-        /// Get the curve that represents the current display gamma
-        /// </summary>
         public GammaRamp GetDisplayGammaRamp()
         {
             NativeMethods.GetDeviceGammaRamp(_dc, out var ramp);
             return ramp;
         }
 
-        /// <summary>
-        /// Change the display gamma based on given curve
-        /// </summary>
-        private void SetDisplayGammaRamp(GammaRamp ramp)
+        private void SetRamp(GammaRamp ramp)
         {
             // Offset the values in ramp slightly...
             // ... this forces the ramp to refresh every time
@@ -46,10 +40,9 @@ namespace LightBulb.Services
             NativeMethods.SetDeviceGammaRamp(_dc, ref ramp);
         }
 
-        /// <inheritdoc />
-        public void SetDisplayGammaLinear(ColorIntensity intensity)
+        public void SetLinear(ColorIntensity intensity)
         {
-            var ramp = new GammaRamp(256);
+            var ramp = new GammaRamp();
 
             for (var i = 1; i < 256; i++)
             {
@@ -58,16 +51,15 @@ namespace LightBulb.Services
                 ramp.Blue[i] = (ushort) (i*255*intensity.Blue);
             }
 
-            SetDisplayGammaRamp(ramp);
+            SetRamp(ramp);
         }
 
-        /// <inheritdoc />
         public void RestoreDefault()
         {
-            SetDisplayGammaLinear(ColorIntensity.Identity);
+            SetLinear(ColorIntensity.Identity);
         }
 
-        protected void Dispose(bool disposing)
+        private void ReleaseUnmanagedResources()
         {
             RestoreDefault();
             NativeMethods.ReleaseDC(IntPtr.Zero, _dc);
@@ -75,7 +67,7 @@ namespace LightBulb.Services
 
         public void Dispose()
         {
-            Dispose(true);
+            ReleaseUnmanagedResources();
             GC.SuppressFinalize(this);
         }
     }

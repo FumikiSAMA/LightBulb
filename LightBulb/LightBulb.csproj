@@ -102,15 +102,14 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Helpers\SyncedTimer.cs" />
-    <Compile Include="Helpers\Timer.cs" />
-    <Compile Include="Helpers\ValueSmoother.cs" />
-    <Compile Include="Internal\HookManager.cs" />
+    <Compile Include="Internal\SyncedTimer.cs" />
+    <Compile Include="Internal\Timer.cs" />
+    <Compile Include="Internal\ValueSmoother.cs" />
+    <Compile Include="Internal\WinHookManager.cs" />
     <Compile Include="Internal\NativeMethods.cs" />
     <Compile Include="Internal\SpongeWindow.cs" />
     <Compile Include="Internal\WndProcEventArgs.cs" />
     <Compile Include="Locator.cs" />
-    <Compile Include="Converters\HotkeyToStringConverter.cs" />
     <Page Include="Views\GeneralSettingsView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -143,7 +142,7 @@
     <Compile Include="Models\Proxy.cs" />
     <Compile Include="Models\Rect.cs" />
     <Compile Include="Models\SolarInfo.cs" />
-    <Compile Include="Services\FileSettingsService.cs" />
+    <Compile Include="Services\SettingsService.cs" />
     <Compile Include="Services\HttpService.cs" />
     <Compile Include="Services\IGammaService.cs" />
     <Compile Include="Services\IGeoService.cs" />
@@ -151,14 +150,14 @@
     <Compile Include="Services\IHttpService.cs" />
     <Compile Include="Services\ISettingsService.cs" />
     <Compile Include="Services\ITemperatureService.cs" />
-    <Compile Include="Services\IVersionCheckService.cs" />
+    <Compile Include="Services\IUpdateCheckService.cs" />
     <Compile Include="Services\IWindowService.cs" />
     <Compile Include="Services\TemperatureService.cs" />
-    <Compile Include="Services\WebGeoService.cs" />
-    <Compile Include="Services\WebVersionCheckService.cs" />
-    <Compile Include="Services\WindowsGammaService.cs" />
-    <Compile Include="Services\WindowsHotkeyService.cs" />
-    <Compile Include="Services\WindowsWindowService.cs" />
+    <Compile Include="Services\GeoService.cs" />
+    <Compile Include="Services\UpdateCheckService.cs" />
+    <Compile Include="Services\GammaService.cs" />
+    <Compile Include="Services\HotkeyService.cs" />
+    <Compile Include="Services\WindowService.cs" />
     <Compile Include="ViewModels\AdvancedSettingsViewModel.cs" />
     <Compile Include="ViewModels\GeneralSettingsViewModel.cs" />
     <Compile Include="ViewModels\GeoSettingsViewModel.cs" />

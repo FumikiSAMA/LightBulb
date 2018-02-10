@@ -72,9 +72,9 @@
                        Margin="3,0,0,0"
                        VerticalAlignment="Top"
                        TextWrapping="Wrap">
-                <Run Foreground="{DynamicResource PrimaryTextBrush}" Text="{Binding SettingsService.GeoInfo.City, Mode=OneWay, TargetNullValue=???}" />
+                <Run Foreground="{DynamicResource PrimaryTextBrush}" Text="{Binding SettingsService.GeoInfo.CityName, Mode=OneWay, TargetNullValue=???}" />
                 <Run Text="/" />
-                <Run Foreground="{DynamicResource PrimaryTextBrush}" Text="{Binding SettingsService.GeoInfo.Country, Mode=OneWay, TargetNullValue=???}" />
+                <Run Foreground="{DynamicResource PrimaryTextBrush}" Text="{Binding SettingsService.GeoInfo.CountryName, Mode=OneWay, TargetNullValue=???}" />
                 <Run Text="(" /><Run Foreground="{DynamicResource PrimaryTextBrush}" Text="{Binding SettingsService.GeoInfo.Latitude, Mode=OneWay, TargetNullValue=xx}" />
                 <Run Text="lat" />
                 <Run Foreground="{DynamicResource PrimaryTextBrush}" Text="{Binding SettingsService.GeoInfo.Longitude, Mode=OneWay, TargetNullValue=xx}" />

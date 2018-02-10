@@ -1,8 +1,5 @@
 ﻿namespace LightBulb.Models
 {
-    /// <summary>
-    /// Internet proxy settings
-    /// </summary>
     public class Proxy
     {
         public string Host { get; }

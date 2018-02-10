@@ -2,24 +2,12 @@
 
 namespace LightBulb.Models
 {
-    /// <summary>
-    /// Specifies color channel output level multipliers
-    /// </summary>
-    public partial struct ColorIntensity
+    public partial class ColorIntensity
     {
-        /// <summary>
-        /// Red multiplier
-        /// </summary>
         public double Red { get; }
 
-        /// <summary>
-        /// Green multiplier
-        /// </summary>
         public double Green { get; }
 
-        /// <summary>
-        /// Blue multiplier
-        /// </summary>
         public double Blue { get; }
 
         public ColorIntensity(double red, double green, double blue)
@@ -44,22 +32,13 @@ namespace LightBulb.Models
             Red = Green = Blue = uniform;
         }
 
-        public override string ToString()
-        {
-            return $"R:{Red:0.###} G:{Green:0.###} B:{Blue:0.###}";
-        }
+        public override string ToString() => $"R:{Red:0.###} G:{Green:0.###} B:{Blue:0.###}";
     }
 
-    public partial struct ColorIntensity
+    public partial class ColorIntensity
     {
-        /// <summary>
-        /// Color intensity with all multipliers equal to 1
-        /// </summary>
         public static ColorIntensity Identity { get; } = new ColorIntensity(1);
 
-        /// <summary>
-        /// Convert color temperature to color intensity
-        /// </summary>
         public static ColorIntensity FromTemperature(ushort temp)
         {
             // Original code credit: http://www.tannerhelland.com/4435/convert-temperature-rgb-algorithm-code/

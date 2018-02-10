@@ -9,17 +9,14 @@ namespace LightBulb.ViewModels
     {
         private readonly ITemperatureService _temperatureService;
 
-        /// <inheritdoc />
         public ISettingsService SettingsService { get; }
 
-        /// <inheritdoc />
         public bool IsPreviewModeEnabled
         {
             get => _temperatureService.IsPreviewModeEnabled;
             set => _temperatureService.IsPreviewModeEnabled = value;
         }
 
-        /// <inheritdoc />
         public bool IsCyclePreviewRunning
         {
             get => _temperatureService.IsCyclePreviewRunning;
@@ -49,11 +46,6 @@ namespace LightBulb.ViewModels
             StartStopCyclePreviewCommand = new RelayCommand(StartStopCyclePreview);
         }
 
-        ~GeneralSettingsViewModel()
-        {
-            Dispose(false);
-        }
-
         private void TemperatureServiceCyclePreviewStarted(object sender, EventArgs args)
         {
             RaisePropertyChanged(() => IsCyclePreviewRunning);
@@ -74,19 +66,10 @@ namespace LightBulb.ViewModels
             IsCyclePreviewRunning = !IsCyclePreviewRunning;
         }
 
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                _temperatureService.CyclePreviewStarted -= TemperatureServiceCyclePreviewStarted;
-                _temperatureService.CyclePreviewEnded -= TemperatureServiceCyclePreviewEnded;
-            }
-        }
-
         public void Dispose()
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
+            _temperatureService.CyclePreviewStarted -= TemperatureServiceCyclePreviewStarted;
+            _temperatureService.CyclePreviewEnded -= TemperatureServiceCyclePreviewEnded;
         }
     }
 }

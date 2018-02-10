@@ -1,25 +1,16 @@
 ﻿using System;
 
-namespace LightBulb.Helpers
+namespace LightBulb.Internal
 {
-    /// <summary>
-    /// Timer that runs on a separate thread and only triggers new events if the old ones have been handled
-    /// </summary>
-    public class Timer : IDisposable
+    internal class Timer : IDisposable
     {
         private bool _isBusy;
         private TimeSpan _interval;
 
         protected System.Timers.Timer InternalTimer { get; }
 
-        /// <summary>
-        /// Whether the timer should fire events
-        /// </summary>
         public bool IsEnabled { get; set; }
 
-        /// <summary>
-        /// The amount of time between each timer tick
-        /// </summary>
         public TimeSpan Interval
         {
             get => _interval;
@@ -33,9 +24,6 @@ namespace LightBulb.Helpers
             }
         }
 
-        /// <summary>
-        /// Triggered when the timer ticks
-        /// </summary>
         public event EventHandler Tick;
 
         public Timer(TimeSpan interval)
@@ -51,11 +39,6 @@ namespace LightBulb.Helpers
         {
         }
 
-        ~Timer()
-        {
-            Dispose(false);
-        }
-
         private void TimerTickInternal()
         {
             if (!IsEnabled || _isBusy) return;
@@ -69,19 +52,10 @@ namespace LightBulb.Helpers
             Tick?.Invoke(this, EventArgs.Empty);
         }
 
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                InternalTimer.Dispose();
-            }
-        }
 
-        /// <inheritdoc />
         public void Dispose()
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
+            InternalTimer.Dispose();
         }
     }
 }

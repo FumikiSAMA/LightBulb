@@ -1,23 +1,17 @@
 ﻿using System;
 using Tyrrrz.Extensions;
 
-namespace LightBulb.Helpers
+namespace LightBulb.Internal
 {
-    public class ValueSmoother : IDisposable
+    internal class ValueSmoother : IDisposable
     {
         private readonly Timer _timer;
         private Action<double> _setter;
         private double _increment;
         private double _final;
 
-        /// <summary>
-        /// Whether a valus is being smoothed right now
-        /// </summary>
         public bool IsActive => _timer.IsEnabled;
 
-        /// <summary>
-        /// Current value
-        /// </summary>
         public double Current { get; private set; }
 
         public event EventHandler Finished;
@@ -26,11 +20,6 @@ namespace LightBulb.Helpers
         {
             _timer = new Timer(TimeSpan.FromMilliseconds(50));
             _timer.Tick += (sender, args) => Tick();
-        }
-
-        ~ValueSmoother()
-        {
-            Dispose(false);
         }
 
         private void Tick()
@@ -44,7 +33,7 @@ namespace LightBulb.Helpers
                 _setter(Current);
 
                 // Ending condition
-                if ((isIncreasing && Current >= _final) || (!isIncreasing && Current <= _final))
+                if (isIncreasing && Current >= _final || !isIncreasing && Current <= _final)
                 {
                     _timer.IsEnabled = false;
                     Finished?.Invoke(this, EventArgs.Empty);
@@ -52,9 +41,6 @@ namespace LightBulb.Helpers
             }
         }
 
-        /// <summary>
-        /// Smoothly changes the value of a property over time
-        /// </summary>
         public void Set(double from, double to, Action<double> setter, TimeSpan duration)
         {
             _timer.IsEnabled = false;
@@ -75,27 +61,14 @@ namespace LightBulb.Helpers
             }
         }
 
-        /// <summary>
-        /// Stops the current transition, if active
-        /// </summary>
         public void Stop()
         {
             _timer.IsEnabled = false;
         }
 
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                _timer.Dispose();
-            }
-        }
-
-        /// <inheritdoc />
         public void Dispose()
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
+            _timer.Dispose();
         }
     }
 }

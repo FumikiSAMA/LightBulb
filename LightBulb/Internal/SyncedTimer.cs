@@ -1,20 +1,14 @@
 ﻿using System;
 using Tyrrrz.Extensions;
 
-namespace LightBulb.Helpers
+namespace LightBulb.Internal
 {
-    /// <summary>
-    /// Timer that triggers recurring events at specified time and interval, regardless of when it was started
-    /// </summary>
-    public class SyncedTimer : IDisposable
+    internal class SyncedTimer : IDisposable
     {
         private readonly Timer _timer;
         private DateTime _firstTickDateTime;
         private TimeSpan _interval;
 
-        /// <summary>
-        /// Whether the timer should fire events
-        /// </summary>
         public bool IsEnabled
         {
             get => _timer.IsEnabled;
@@ -26,9 +20,6 @@ namespace LightBulb.Helpers
             }
         }
 
-        /// <summary>
-        /// The amount of time between each timer tick
-        /// </summary>
         public TimeSpan Interval
         {
             get => _interval;
@@ -42,9 +33,6 @@ namespace LightBulb.Helpers
             }
         }
 
-        /// <summary>
-        /// The first time the timer should fire an event
-        /// </summary>
         public DateTime FirstTickDateTime
         {
             get => _firstTickDateTime;
@@ -55,9 +43,6 @@ namespace LightBulb.Helpers
             }
         }
 
-        /// <summary>
-        /// Triggered when the timer ticks
-        /// </summary>
         public event EventHandler Tick;
 
         public SyncedTimer(TimeSpan interval, DateTime firstTickDateTime)
@@ -85,11 +70,6 @@ namespace LightBulb.Helpers
         {
         }
 
-        ~SyncedTimer()
-        {
-            Dispose(false);
-        }
-
         private void SyncInterval()
         {
             var now = DateTime.Now;
@@ -108,19 +88,9 @@ namespace LightBulb.Helpers
             }
         }
 
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                _timer.Dispose();
-            }
-        }
-
-        /// <inheritdoc />
         public void Dispose()
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
+            _timer.Dispose();
         }
     }
 }

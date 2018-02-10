@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 
 namespace LightBulb.Internal
 {
@@ -23,52 +22,39 @@ namespace LightBulb.Internal
             ReleaseUnmanagedResources();
         }
 
-        public IntPtr RegisterWinEvent(
+        public IntPtr Register(
             uint eventId, WinEventHandler handler,
             uint processId = 0, uint threadId = 0, uint flags = 0)
         {
-            var handle = NativeMethods.SetWinEventHook(eventId, eventId, IntPtr.Zero, handler, processId, threadId, flags);
-            if (handle == IntPtr.Zero)
-            {
-                Debug.WriteLine($"Could not register WinEventHook for {eventId}", GetType().Name);
-                return IntPtr.Zero;
-            }
-
+            var handle =
+                NativeMethods.SetWinEventHook(eventId, eventId, IntPtr.Zero, handler, processId, threadId, flags);
             _hookHandlerDic.Add(handle, handler);
+
             return handle;
         }
 
-        public void UnregisterWinEvent(IntPtr handle)
+        public void Unregister(IntPtr handle)
         {
-            if (!NativeMethods.UnhookWinEvent(handle))
-            {
-                Debug.WriteLine("Could not unregister WinEventHook", GetType().Name);
-            }
-
+            NativeMethods.UnhookWinEvent(handle);
             _hookHandlerDic.Remove(handle);
         }
 
-        public void UnregisterAllWinEvents()
+        public void UnregisterAll()
         {
-            foreach (var hook in _hookHandlerDic)
-            {
-                if (!NativeMethods.UnhookWinEvent(hook.Key))
-                {
-                    Debug.WriteLine("Could not unregister WinEventHook", GetType().Name);
-                }
-            }
+            foreach (var handle in _hookHandlerDic.Keys)
+                NativeMethods.UnhookWinEvent(handle);
 
             _hookHandlerDic.Clear();
         }
 
         private void ReleaseUnmanagedResources()
         {
-            UnregisterAllWinEvents();
+            UnregisterAll();
         }
 
         public void Dispose()
         {
-            UnregisterAllWinEvents();
+            UnregisterAll();
             GC.SuppressFinalize(this);
         }
     }

@@ -57,12 +57,12 @@ namespace LightBulb.Services
 
                     // Hook location changed event for foreground window
                     if (_foregroundWindowLocationChangedHook != IntPtr.Zero)
-                        _winHookManager.UnregisterWinEvent(_foregroundWindowLocationChangedHook);
-                    _foregroundWindowLocationChangedHook = _winHookManager.RegisterWinEvent(0x800B,
+                        _winHookManager.Unregister(_foregroundWindowLocationChangedHook);
+                    _foregroundWindowLocationChangedHook = _winHookManager.Register(0x800B,
                         foregroundWindowLocationChangedEventHandler, 0, thread);
                 });
 
-            _winHookManager.RegisterWinEvent(0x0003, foregroundWindowChangedEventHandler);
+            _winHookManager.Register(0x0003, foregroundWindowChangedEventHandler);
 
             // Init
             IsForegroundFullScreen = IsWindowFullScreen(GetForegroundWindow());

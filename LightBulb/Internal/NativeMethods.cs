@@ -23,10 +23,10 @@ namespace LightBulb.Internal
         public static extern int ReleaseDC(IntPtr hWnd, IntPtr hDC);
 
         [DllImport("gdi32.dll", EntryPoint = "SetDeviceGammaRamp", SetLastError = true)]
-        public static extern bool SetDeviceGammaRamp(IntPtr hMonitor, ref GammaRamp ramp);
+        public static extern bool SetDeviceGammaRamp(IntPtr hDC, ref GammaRamp lpRamp);
 
         [DllImport("gdi32.dll", EntryPoint = "GetDeviceGammaRamp", SetLastError = true)]
-        public static extern bool GetDeviceGammaRamp(IntPtr hMonitor, out GammaRamp ramp);
+        public static extern bool GetDeviceGammaRamp(IntPtr hDC, out GammaRamp lpRamp);
 
         [DllImport("user32.dll", EntryPoint = "RegisterHotKey", SetLastError = true)]
         public static extern bool RegisterHotKey(IntPtr hWnd, int id, int fsModifiers, int vk);
@@ -44,15 +44,15 @@ namespace LightBulb.Internal
         public static extern IntPtr GetShellWindow();
 
         [DllImport("user32.dll", EntryPoint = "GetWindowRect", SetLastError = true)]
-        public static extern bool GetWindowRect(IntPtr hWindow, out Rect rect);
+        public static extern bool GetWindowRect(IntPtr hWnd, out Rect lpRect);
 
         [DllImport("user32.dll", EntryPoint = "GetClientRect", SetLastError = true)]
-        public static extern bool GetWindowClientRect(IntPtr hWindow, out Rect rect);
+        public static extern bool GetWindowClientRect(IntPtr hWnd, out Rect lpRect);
 
         [DllImport("user32.dll", EntryPoint = "IsWindowVisible", SetLastError = true)]
-        public static extern bool IsWindowVisible(IntPtr hWindow);
+        public static extern bool IsWindowVisible(IntPtr hWnd);
 
         [DllImport("user32.dll", EntryPoint = "GetClassName", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern int GetClassName(IntPtr hWindow, StringBuilder className, int maxCount);
+        public static extern int GetClassName(IntPtr hWnd, StringBuilder lpClassName, int nMaxCount);
     }
 }

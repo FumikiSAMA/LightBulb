@@ -107,8 +107,7 @@
     <Compile Include="Internal\ValueSmoother.cs" />
     <Compile Include="Internal\WinHookManager.cs" />
     <Compile Include="Internal\NativeMethods.cs" />
-    <Compile Include="Internal\SpongeWindow.cs" />
-    <Compile Include="Internal\WndProcEventArgs.cs" />
+    <Compile Include="Internal\WndProcSpongeWindow.cs" />
     <Compile Include="Locator.cs" />
     <Page Include="Views\GeneralSettingsView.xaml">
       <SubType>Designer</SubType>

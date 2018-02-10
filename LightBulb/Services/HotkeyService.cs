@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.Windows.Forms;
 using System.Windows.Input;
 using LightBulb.Internal;
 using LightBulb.Models;
@@ -10,15 +10,13 @@ namespace LightBulb.Services
 {
     public class HotkeyService : IHotkeyService, IDisposable
     {
-        private readonly SpongeWindow _sponge;
+        private readonly WndProcSpongeWindow _wndProcSpongeWindow;
         private readonly Dictionary<int, Action> _hotkeyHandlerDic;
 
         public HotkeyService()
         {
-            _sponge = new SpongeWindow();
+            _wndProcSpongeWindow = new WndProcSpongeWindow(ProcessMessage);
             _hotkeyHandlerDic = new Dictionary<int, Action>();
-
-            _sponge.WndProcFired += ProcessMessage;
         }
 
         ~HotkeyService()
@@ -26,11 +24,11 @@ namespace LightBulb.Services
             ReleaseUnmanagedResources();
         }
 
-        private void ProcessMessage(object sender, WndProcEventArgs args)
+        private void ProcessMessage(Message message)
         {
-            if (args.Message.Msg != 0x0312) return;
+            if (message.Msg != 0x0312) return;
 
-            var id = args.Message.WParam.ToInt32();
+            var id = message.WParam.ToInt32();
             var handler = _hotkeyHandlerDic.GetOrDefault(id);
 
             handler?.Invoke();
@@ -42,12 +40,7 @@ namespace LightBulb.Services
             var mods = (int) hotkey.Modifiers;
             var id = (vk << 8) | mods;
 
-            if (!NativeMethods.RegisterHotKey(_sponge.Handle, id, mods, vk))
-            {
-                Debug.WriteLine("Could not register a hotkey", GetType().Name);
-                return;
-            }
-
+            NativeMethods.RegisterHotKey(_wndProcSpongeWindow.Handle, id, mods, vk);
             _hotkeyHandlerDic.Add(id, handler);
         }
 
@@ -57,23 +50,14 @@ namespace LightBulb.Services
             var mods = (int) hotkey.Modifiers;
             var id = (vk << 8) | mods;
 
-            if (!NativeMethods.UnregisterHotKey(_sponge.Handle, id))
-            {
-                Debug.WriteLine("Could not unregister a hotkey", GetType().Name);
-            }
-
+            NativeMethods.UnregisterHotKey(_wndProcSpongeWindow.Handle, id);
             _hotkeyHandlerDic.Remove(id);
         }
 
         public void UnregisterAll()
         {
-            foreach (var hotkey in _hotkeyHandlerDic)
-            {
-                if (!NativeMethods.UnregisterHotKey(_sponge.Handle, hotkey.Key))
-                {
-                    Debug.WriteLine("Could not unregister a hotkey", GetType().Name);
-                }
-            }
+            foreach (var id in _hotkeyHandlerDic.Keys)
+                NativeMethods.UnregisterHotKey(_wndProcSpongeWindow.Handle, id);
 
             _hotkeyHandlerDic.Clear();
         }

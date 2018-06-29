@@ -19,24 +19,21 @@ namespace LightBulb.Services
             ReleaseUnmanagedResources();
         }
 
-        public GammaRamp GetDisplayGammaRamp()
+        private void OffsetGammaRamp(GammaRamp ramp)
         {
-            NativeMethods.GetDeviceGammaRamp(_dc, out var ramp);
-            return ramp;
+            // Some drivers will not update gamma if the ramp is same as set before
+            // despite the actual gamma possibly being different than it was set.
+            // This method offsets the ramp slightly, enough for it to be different
+            // but not enough for the change to have any visual effect.
+            _gammaChannelOffset = ++_gammaChannelOffset % 5;
+            ramp.Red[255] = (ushort) (ramp.Red[255] + _gammaChannelOffset);
+            ramp.Green[255] = (ushort) (ramp.Green[255] + _gammaChannelOffset);
+            ramp.Blue[255] = (ushort) (ramp.Blue[255] + _gammaChannelOffset);
         }
 
         private void SetRamp(GammaRamp ramp)
         {
-            // Offset the values in ramp slightly...
-            // ... this forces the ramp to refresh every time
-            // ... because some drivers will ignore stale ramps
-            // ... while the gamma itself might have been changed
-            _gammaChannelOffset = ++_gammaChannelOffset%5;
-            ramp.Red[255] = (ushort) (ramp.Red[255] + _gammaChannelOffset);
-            ramp.Green[255] = (ushort) (ramp.Green[255] + _gammaChannelOffset);
-            ramp.Blue[255] = (ushort) (ramp.Blue[255] + _gammaChannelOffset);
-
-            // Set ramp
+            OffsetGammaRamp(ramp);
             NativeMethods.SetDeviceGammaRamp(_dc, ref ramp);
         }
 
